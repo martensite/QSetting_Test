@@ -16,14 +16,14 @@ CheckHostThread::~CheckHostThread()
 void CheckHostThread::run()
 {
     while(!stopped){
-        this->mutex.lock();
+        //this->mutex.lock();
         //QSettings *checkini=new QSettings(file,QSettings::IniFormat);
         inifile=new QSettings(this->file,QSettings::IniFormat);
         check_host(inifile);
         if(this->isFinished())
             stop();
     }
-    this->mutex.unlock();
+    //this->mutex.unlock();
 }
 //Stop function, set stopped to true
 void CheckHostThread::stop()
@@ -35,8 +35,9 @@ void CheckHostThread::check_host(QSettings*  ini)
 {
     QStringList childGroups=ini->childGroups();
     QStringList allKeys=ini->allKeys();
-
+    //QMutexLocker locker(&mutex);
         //List hosts that have shared files
+    mutex.lock();
         foreach (const QString &childGroup, childGroups)
         {
             //Check whether that host has shared anything
@@ -51,10 +52,8 @@ void CheckHostThread::check_host(QSettings*  ini)
         //list all shared files
         foreach (const QString &key, allKeys)
         {
-            //this->mutex.lock();
-            //this->wait();
             //list2->addItem(ini->value(key).toString());
             emit send_to_list2(ini->value(key).toString());
          }
-        //this->mutex.unlock();
+        mutex.unlock();
     }
