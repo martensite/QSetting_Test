@@ -37,7 +37,6 @@ void CheckHostThread::check_host(QSettings*  ini)
     QStringList allKeys=ini->allKeys();
     //QMutexLocker locker(&mutex);
         //List hosts that have shared files
-    mutex.lock();
         foreach (const QString &childGroup, childGroups)
         {
             //Check whether that host has shared anything
@@ -46,14 +45,18 @@ void CheckHostThread::check_host(QSettings*  ini)
                 break;
             else
                 //list1->addItem(childGroup);
+                this->mutex.lock();
                 emit send_to_list1(childGroup);
+                this->mutex.unlock();
             ini->endGroup();
         }
         //list all shared files
         foreach (const QString &key, allKeys)
         {
+            this->mutex.lock();
             //list2->addItem(ini->value(key).toString());
             emit send_to_list2(ini->value(key).toString());
+            this->mutex.unlock();
          }
-        mutex.unlock();
+
     }
